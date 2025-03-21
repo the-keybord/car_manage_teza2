@@ -11,13 +11,14 @@ class CarService {
     try {
       print("🔍 Scanning for car...");
 
-      if (bleDeviceId=='none'){
+      if (bleDeviceId == 'none') {
         print('Car is none');
         return false;
       }
-      List<BluetoothDevice> connectedDevices = await FlutterBluePlus.connectedDevices;
+      List<BluetoothDevice> connectedDevices =
+          await FlutterBluePlus.connectedDevices;
       _connectedCar = connectedDevices.firstWhere(
-            (d) => d.remoteId.str == bleDeviceId,
+        (d) => d.remoteId.str == bleDeviceId,
         orElse: () => BluetoothDevice(remoteId: DeviceIdentifier(bleDeviceId)),
       );
 
@@ -30,12 +31,13 @@ class CarService {
 
       final prefs = await SharedPreferences.getInstance();
       bool isEnabled = prefs.getBool('automatic_connection') ?? false;
-      
-      if(isEnabled){
-        sendCommand('AUTO_OPEN_ON');}
-      else{
-        sendCommand('AUTO_OPEN_OFF');}
-      
+
+      if (isEnabled) {
+        sendCommand('AUTO_OPEN_ON');
+      } else {
+        sendCommand('AUTO_OPEN_OFF');
+      }
+
       return true;
     } catch (e) {
       print("❌ Connection Failed: $e");
@@ -59,7 +61,8 @@ class CarService {
 
     try {
       var services = await _connectedCar!.discoverServices();
-      var characteristic = services.expand((service) => service.characteristics)
+      var characteristic = services
+          .expand((service) => service.characteristics)
           .firstWhere((c) => c.uuid.toString().contains("abcd1234"));
 
       await characteristic.write(command.codeUnits);
