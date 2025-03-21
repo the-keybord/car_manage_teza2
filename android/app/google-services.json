@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "836717751024",
+    "project_id": "car-manage2",
+    "storage_bucket": "car-manage2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836717751024:android:db59e4301334409e88f035",
+        "android_client_info": {
+          "package_name": "com.keybord.car_manage_teza2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRj3aCgke3hoMNKUviEahYYqB8qc0iTR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
