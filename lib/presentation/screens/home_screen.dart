@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_screen.dart';
-import 'screens/car_list_screen.dart';
-import 'screens/car_control_screen.dart';
-import 'screens/options_screen.dart'; // ✅ Added Options Screen
-import 'car_service.dart';
+import 'car_list_screen.dart';
+import 'car_control_screen.dart';
+import 'options_screen.dart'; // ✅ Added Options Screen
+import '../../services/car_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ✅ Called when user selects a car from `CarListScreen`
   Future<void> _onCarSelected(String carId, String carName, String bleDeviceId) async {
-    bool success = await carService.connectToCar(bleDeviceId);
+    bool success = await carService.connectToSelectedCar();
     if (success) {
       setState(() {
         selectedCarId = carId;
@@ -52,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return [
       CarListScreen(onCarSelected: _onCarSelected), // ✅ Select Car
       CarControlScreen(
-        carService: carService,
         carName: selectedCarName ?? "Unknown",
         carId: selectedCarId ?? "",
       ),

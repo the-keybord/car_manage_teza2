@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_screen.dart';
-import 'auth_screen.dart';
-import 'background_service.dart';
-import 'notification_service.dart';
+import 'presentation/screens/home_screen.dart';
+import 'presentation/screens/auth_screen.dart';
+import 'package:car_manage_teza2/background_service.dart';
+import 'services/notification_service.dart';
 import 'package:get/get.dart';
-import 'settings_controller.dart';
-
+import 'controllers/car_controller.dart';
+import 'controllers/car_list_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await NotificationService.initialize();
-  Get.put(SettingsController());
-
-  //await initializeService();
+  Get.put(CarController());
+  Get.put(CarListController());
+  await initializeService();
   runApp(MyApp());
 }
 

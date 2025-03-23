@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'notification_service.dart';
-import 'car_service.dart';
+import 'services/notification_service.dart';
 
-final CarService carService = CarService();
+import 'ble_communication_tools.dart';
+
+
+
+final BleCommunicationTools bleTool = BleCommunicationTools();
 Timer? _backgroundTimer;
+
+
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -60,12 +65,12 @@ void onStart(ServiceInstance service) async {
 
     print("🔍 Scanning for car: $savedCarBleId");
 
-    bool carFound = await carService.scanForSelectedCar(savedCarBleId);
+    bool carFound = await bleTool.scanForSelectedCar(savedCarBleId);
 
     if (carFound) {
       print("🚗 Car detected! Attempting to connect...");
 
-      bool isConnected = await carService.connectToCar(savedCarBleId)
+      bool isConnected = await bleTool.connectToCar(savedCarBleId)
           .timeout(Duration(seconds: 10),onTimeout: (){print('timedOut');return false;});
 
       if (isConnected) {
