@@ -10,7 +10,23 @@ class OptionsScreen extends StatefulWidget {
 
 class _OptionsScreenState extends State<OptionsScreen> {
   bool isNotificationsEnabled = false;
+  bool value1 = false;
+  bool value2 = false;
 
+  int _distanceLevel = 1; // 0: Very Close, 1: Close, 2: Nearby
+
+  String get distanceLabel {
+    switch (_distanceLevel) {
+      case 0:
+        return "Minimum";
+      case 1:
+        return "Medium";
+      case 2:
+        return "Maximum";
+      default:
+        return "";
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -50,6 +66,62 @@ class _OptionsScreenState extends State<OptionsScreen> {
             subtitle: Text("Enable or disable autoconnection"),
             value: isNotificationsEnabled,
             onChanged: _toggleAutoConnect,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Connection Distance",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Slider(
+                      value: _distanceLevel.toDouble(),
+                      min: 0,
+                      max: 2,
+                      divisions: 2,
+                      label: distanceLabel,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          _distanceLevel = newValue.round();
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text("Min", style: TextStyle(fontSize: 12)),
+                        Text("-", style: TextStyle(fontSize: 12)),
+                        Text("Max", style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+            ],
+          ),
+          SwitchListTile(
+            title: Text("Background Connection"),
+            subtitle: Text("Enable or disable autoconnection"),
+            value: value1,
+            onChanged: (bool value) {setState(() {
+              value1=value;
+            });},
+          ),
+          SwitchListTile(
+            title: Text("Background Connection"),
+            subtitle: Text("Enable or disable autoconnection"),
+            value: value2,
+            onChanged: (bool value) {setState(() {
+              value2=value;
+            });},
           ),
         ],
       ),

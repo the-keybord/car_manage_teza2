@@ -1,103 +1,131 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'home_screen.dart';
+import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart';
 
-class AuthScreen extends StatefulWidget {
-  @override
-  _AuthScreenState createState() => _AuthScreenState();
-}
+class AuthScreen extends StatelessWidget {
+  final AuthController authController = Get.find();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
-class _AuthScreenState extends State<AuthScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool isLogin = true;
-
-  Future<void> _signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // User canceled the sign-in
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await _auth.signInWithCredential(credential);
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } catch (e) {
-      print("Google Sign-In Failed: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Google Sign-In Failed")),
-      );
-    }
-  }
-
-  void _submit() async {
-    try {
-      if (isLogin) {
-        await _auth.signInWithEmailAndPassword(
-            email: _emailController.text, password: _passwordController.text);
-      } else {
-        await _auth.createUserWithEmailAndPassword(
-            email: _emailController.text, password: _passwordController.text);
-      }
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } catch (e) {
-      print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Authentication Failed")),
-      );
-    }
-  }
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(isLogin ? "Login" : "Sign Up")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: "Email"),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: "Password"),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submit,
-              child: Text(isLogin ? "Login" : "Sign Up"),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  isLogin = !isLogin;
-                });
-              },
-              child: Text(isLogin ? "Create an account" : "Already have an account? Login"),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: Icon(Icons.login),
-              label: Text("Sign in with Google"),
-              onPressed: _signInWithGoogle,
-            )
-          ],
-        ),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: Center(
+        child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+    child: Obx(() => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+    Text(
+    authController.isLogin.value ? "Welcome Back" : "Create Account",
+    style: Theme.of(context)
+        .textTheme
+        .displayMedium
+        ?.copyWith(fontWeight: FontWeight.bold),
+    ),
+    const SizedBox(height: 10),
+    Text(
+    authController.isLogin.value
+    ? "Login to your account"
+        : "Sign up with your email",
+    style: Theme.of(context).textTheme.bodyLarge,
+    ),
+    const SizedBox(height: 30),
+    Form(
+    key: _formKey,
+    child: Column(
+    children: [
+    TextFormField(
+    controller: emailController,
+    decoration: InputDecoration(
+    labelText: "Email",
+    prefixIcon: Icon(Icons.email),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+    ),
+    validator: (value) => value == null || value.isEmpty
+    ? "Enter your email"
+        : null,
+    ),
+    const SizedBox(height: 16),
+    TextFormField(
+    controller: passwordController,
+    decoration: InputDecoration(
+    labelText: "Password",
+    prefixIcon: Icon(Icons.lock),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+    ),
+    obscureText: true,
+    validator: (value) =>
+    value == null || value.length < 6 ? "Minimum 6 characters" : null,
+    ),
+    const SizedBox(height: 24),
+    SizedBox(
+    width: double.infinity,
+    child: ElevatedButton(
+    onPressed: authController.isLoading.value
+    ? null
+        : () {
+    if (_formKey.currentState!.validate()) {
+    authController.submitAuth(
+    emailController.text.trim(),
+    passwordController.text.trim(),
+    );
+    }
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Get.theme.colorScheme.primary,
+    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+    padding: const EdgeInsets.symmetric(vertical: 16),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(5)),
+    ),
+    child: Text(
+    authController.isLogin.value ? "Login" : "Sign Up",
+    style: TextStyle(fontSize: 16),
+    ),
+    ),
+    ),
+    TextButton(
+    onPressed: () => authController.toggleAuthMode(),
+    child: Text(
+    authController.isLogin.value
+    ? "Create an account"
+        : "Already have an account? Login",
+    ),
+    ),
+    const SizedBox(height: 20),
+    Divider(thickness: 1),
+    const SizedBox(height: 16),
+    ElevatedButton.icon(
+    icon: Icon(Icons.account_circle),
+    label: Text("Sign in with Google"),
+    onPressed: authController.isLoading.value
+    ? null
+        : () => authController.signInWithGoogle(),
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.red.shade400,
+    foregroundColor: Colors.white,
+
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+    ),
+    ),
+      if (authController.isLoading.value) ...[
+        const SizedBox(height: 20),
+        CircularProgressIndicator(),
+      ]
+    ],
+    ),
+    ),
+          ],
+        )),
+    ),
+    ),
     );
   }
 }
